@@ -1,0 +1,248 @@
+package org.security.apps.pim;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.util.HashMap;
+
+import android.util.Log;
+
+public class ContactList implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+	private HashMap<Integer, Contact> contacts;
+
+	public ContactList() {
+		try {
+			InputStream file = new FileInputStream("savedContacts");
+			InputStream buffer = new BufferedInputStream(file);
+			ObjectInput input = new ObjectInputStream(buffer);
+
+			try {
+				ContactList savedContacts = (ContactList) input.readObject();
+				this.contacts = savedContacts.contacts;
+			} finally {
+				input.close();
+			}
+		} catch (ClassNotFoundException cnfe) {
+			Log.d(null, null, cnfe);
+			contacts = new HashMap<Integer, Contact>();
+		} catch (IOException ioe) {
+			Log.d(null, null, ioe);
+			contacts = new HashMap<Integer, Contact>();
+		}
+	}
+
+	public boolean SaveContactList() {
+		try {
+			// use buffering
+			OutputStream file = new FileOutputStream("savedContacts");
+			OutputStream buffer = new BufferedOutputStream(file);
+			ObjectOutput output = new ObjectOutputStream(buffer);
+			try {
+				output.writeObject(this);
+			} finally {
+				output.close();
+			}
+		} catch (IOException ioe) {
+			Log.d(null, "Can\'t save contact list", ioe);
+			return false;
+		}
+
+		return true;
+	}
+
+<<<<<<< .mine
+        // if the id is null, we have to create the database record, if the id
+        // field is populated, we will be updating
+        if (id == null) {
+            Log.d(TAG, "creating a new contact: name: " + name
+                    + " phoneNumber: " + phoneNumber + " pubKey: " + pubKey);
+            // create
+=======
+	public void addContact(Contact contact) {
+		int id = contacts.size();
+		contacts.put(id, contact);
+	}
+>>>>>>> .r10
+
+	public boolean removeContact(Integer id) {
+		return (contacts.remove(id) != null) ? true : false;
+	}
+
+<<<<<<< .mine
+            // get the date/time first so both values will be in sync, otherwise
+            // they could be off by a few miliseconds
+            long now = new Date().getTime();
+            newContactValues.put("created_on", now);
+            newContactValues.put("updated_on", now);
+            // Insert the row, it returns the new database id field value
+            long newId = db.insert("contact", null, newContactValues);
+            if (newId != -1) {
+                successfull = true;
+            }
+        } else {
+            Log.d(TAG, "updating a contact: id: " + id + " name: " + name
+                    + " phoneNumber: " + phoneNumber + " pubKey: " + pubKey);
+            // update
+
+            // Create a new row of values to update.
+            ContentValues updateContactValues = new ContentValues();
+
+            // Assign values for each row.
+            updateContactValues.put("name", name);
+            updateContactValues.put("phoneNumber", phoneNumber);
+            updateContactValues.put("pubKey", (String) pubKey);
+
+            long now = new Date().getTime();
+            updateContactValues.put("updated_on", now);
+
+            // update the data, pass the new values for name, phoneNumber and
+            // pssword - using the id field for the where clause
+            // int rowsAffected =
+            db.update("contact", updateContactValues, "id = " + id, null);
+
+            // so long as the update processed, regardless as to it actually
+            // changing any data, call it a success
+            successfull = true;
+        }
+
+        return successfull;
+    }
+
+    public Contact getContact(Integer id) {
+        /*
+         * query( 
+         * boolean distinct - true or false - true if you want each row
+         * to be unique, false otherwise. 
+         * String table - The table name to compile the query against. 
+         * String[] columns - and array of column names to return 
+         * String selection - the where clause String[]
+         * selectionArgs - arguments to the where clause - advanced topic, just use null - see findContactsByPhoneNumber below
+         * String groupBy - advanced topic, use null 
+         * String having - advanced topic, use null 
+         * String orderBy - sort the results - null for however the database feels like returning the data 
+         * String limit - limit the number of row to return )
+         */
+        Cursor cursor = db.query(true, "contact", new String[] { "id", "name",
+                "phoneNumber", "pubKey" }, "id = " + id, null, null, null,
+                null, null);
+
+        // test the results of the query
+        //               +- no results
+        //               v                      v-move the cursor to the first row - will be false if no rows
+        if (cursor.getCount() == 0 || !cursor.moveToFirst()) {
+            throw new SQLException("No contact found for id: " + id);
+        }
+
+        // collect the values, zero indexed and create a new Contact object
+        Integer sanitizedId = cursor.getInt(0); // use the id that came from the
+                                                // database, a small step
+                                                // towards security
+        String name = cursor.getString(1);
+        String phoneNumber = cursor.getString(2);
+        CharSequence pubKey = null;
+
+        // build a contact object to be returned to the caller
+        Contact contact = new Contact(sanitizedId, name, phoneNumber, pubKey);
+
+        return contact;
+    }
+
+    /**
+     * return all contacts sorted by name
+     * 
+     * @return
+     */
+    public Cursor getAllContacts() {
+        return db.query("contact", new String[] { "id", "name", "phoneNumber",
+                "pubKey" }, null, null, null, null, "name", null);
+    }
+
+    /**
+     * get contact(s) by phoneNumber
+     * 
+     * @param phoneNumber
+     * @return
+     */
+    public Cursor findContactsByPhoneNumber(String phoneNumber) {
+        return db.query("contact", new String[] { "id", "name", "phoneNumber",
+                "pubKey" }, "phoneNumber = ?", new String[] { phoneNumber },
+                null, null, "name", null);
+
+        // could have done: "phoneNumber = '" + phoneNumber + "'" // but don't
+        // do that, it is bad practice that leads to security vulnerabilities
+    }
+
+    /**
+     * A class that helps to create or update the database when it is opened
+     * 
+     * @author dpearson
+     * 
+     */
+    private static class ContactDatabaseOpenHelper extends SQLiteOpenHelper {
+        private static final String TAG = "ContactDatabaseOpenHelper";
+
+        private static final String CREATE_TABLE = "CREATE TABLE contact "
+                + "(id INTEGER PRIMARY KEY AUTOINCREMENT, "
+                + "name varchar(50), " + "phoneNumber varchar(50), "
+                + "pubKey varchar(512), " + "created_on long, "
+                + "updated_on long )";
+        private static final String DROP_TABLE = "DROP TABLE IF EXISTS contact";
+
+        public ContactDatabaseOpenHelper(Context context) {
+            super(context, DATABASE_NAME, null, DATABASE_VERSION);
+        }
+
+        /**
+         * if the database does not exist, create the database
+         * 
+         * @see android.database.sqlite.SQLiteOpenHelper#onCreate(android.database.sqlite.SQLiteDatabase)
+         */
+        @Override
+        public void onCreate(SQLiteDatabase db) {
+            Log.d(TAG, "creating new database");
+
+            // create the database table
+            db.execSQL(CREATE_TABLE); // execSQL executes arbitrary SQL
+                                      // statements
+        }
+
+        /**
+         * if the OS detects that the database needs to be upgraded, this will
+         * run
+         * 
+         * this implementation is not for production use, it deletes existing
+         * data
+         * 
+         * 
+         * @see android.database.sqlite.SQLiteOpenHelper#onUpgrade(android.database.sqlite.SQLiteDatabase,
+         *      int, int)
+         */
+        @Override
+        public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
+            Log.d(TAG, "Upgrading database from version " + oldVersion + " to "
+                    + newVersion + ", which will destroy all old data.");
+
+            // drop the database table
+            db.execSQL(DROP_TABLE);
+
+            // recreate the table(s)
+            onCreate(db);
+        }
+    }
+}
+=======
+	public HashMap<Integer, Contact> getContacts() {
+		return contacts;
+	}
+}>>>>>>> .r10

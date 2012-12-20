@@ -1,0 +1,76 @@
+package org.security.apps.pim;
+
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.ObjectInput;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutput;
+import java.io.ObjectOutputStream;
+import java.io.OutputStream;
+import java.io.Serializable;
+import java.util.HashMap;
+
+import android.util.Log;
+
+public class ContactList implements Serializable {
+
+	private static final long serialVersionUID = 1L;
+	private HashMap<Integer, Contact> contacts;
+
+	public ContactList() {
+		try {
+			InputStream file = new FileInputStream("savedContacts");
+			InputStream buffer = new BufferedInputStream(file);
+			ObjectInput input = new ObjectInputStream(buffer);
+
+			try {
+				ContactList savedContacts = (ContactList) input.readObject();
+				this.contacts = savedContacts.contacts;
+			} finally {
+				input.close();
+			}
+		} catch (ClassNotFoundException cnfe) {
+			Log.d(null, null, cnfe);
+			contacts = new HashMap<Integer, Contact>();
+		} catch (IOException ioe) {
+			Log.d(null, null, ioe);
+			contacts = new HashMap<Integer, Contact>();
+		}
+	}
+
+	public boolean SaveContactList() {
+		try {
+			// use buffering
+			OutputStream file = new FileOutputStream("savedContacts");
+			OutputStream buffer = new BufferedOutputStream(file);
+			ObjectOutput output = new ObjectOutputStream(buffer);
+			try {
+				output.writeObject(this);
+			} finally {
+				output.close();
+			}
+		} catch (IOException ioe) {
+			Log.d(null, "Can\'t save contact list", ioe);
+			return false;
+		}
+
+		return true;
+	}
+
+	public void addContact(Contact contact) {
+		int id = contacts.size();
+		contacts.put(id, contact);
+	}
+
+	public boolean removeContact(Integer id) {
+		return (contacts.remove(id) != null) ? true : false;
+	}
+
+	public HashMap<Integer, Contact> getContacts() {
+		return contacts;
+	}
+}

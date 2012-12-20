@@ -1,0 +1,44 @@
+package org.security.apps.pim;
+
+public class Contact {
+
+	private String name;
+	private String phoneNum;
+	private CharSequence[] publicKey;
+	
+	public Contact(String name, String phoneNum) {
+		this.name = name;
+		this.phoneNum = phoneNum;
+		this.publicKey = null;
+	}
+
+	@Override
+	public String toString() {
+		return name + ": " + phoneNum;
+	}
+	
+	public String getName() {
+		return name;
+	}
+
+	public void setName(String name) {
+		this.name = name;
+	}
+
+	public String getPhoneNum() {
+		return phoneNum;
+	}
+
+	public void setPhoneNum(String phoneNum) {
+		this.phoneNum = phoneNum;
+	}
+
+	public CharSequence[] getPublicKey() {
+		return publicKey;
+	}
+
+	public void setPublicKey(CharSequence[] publicKey) {
+		this.publicKey = publicKey;
+	}
+	
+}

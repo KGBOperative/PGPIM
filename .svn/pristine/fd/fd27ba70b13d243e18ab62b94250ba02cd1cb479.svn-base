@@ -1,0 +1,44 @@
+package org.security.apps.pim;
+
+import android.content.ContentValues;
+import android.content.Context;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
+
+public class ContactList {
+	private ContactListDB contactListDB;  
+
+	private SQLiteDatabase database;  
+
+	public final static String CONTACTLIST_TABLE="MyEmployees"; // name of table 
+
+	public final static String CONTACT_PHONENUM="phoneNum"; // id value for employee
+	public final static String CONTACT_NAME="name";  // name of employee
+	/** 
+	 * 
+	 * @param context 
+	 */  
+	public ContactList(Context context){  
+	    contactListDB = new ContactListDB(context);  
+	    database = contactListDB.getWritableDatabase();  
+	}
+
+
+	public long createRecords(String phoneNum, String name){  
+	   ContentValues values = new ContentValues();  
+	   values.put(CONTACT_PHONENUM, phoneNum);  
+	   values.put(CONTACT_NAME, name);  
+	   return database.insert(CONTACTLIST_TABLE, null, values);  
+	}    
+
+	public Cursor selectRecords() {
+		String[] cols = new String[] {CONTACT_PHONENUM, CONTACT_NAME};  
+	    Cursor mCursor = database.query(true, CONTACTLIST_TABLE,cols,null, null, null, null, null, null);  
+	    
+	    if (mCursor != null) {  
+	    	mCursor.moveToFirst();  
+	    }  
+	    
+	    return mCursor; // iterate to get each value.
+	}
+}

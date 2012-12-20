@@ -1,0 +1,52 @@
+package org.security.apps.pim;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import android.os.Bundle;
+import android.app.Activity;
+import android.view.Menu;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+
+public class MainActivity extends Activity {
+
+	private ArrayAdapter<String> adapter;
+	private ContactList contactList;
+	private ListView contactListView;
+	
+    public void onCreate(Bundle savedInstanceState) {
+    	super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+    }
+    
+    
+    
+    @Override
+	protected void onResume() {
+		super.onResume();
+		
+		contactListView = (ListView) findViewById(R.id.contactListView);
+		
+		contactList = new ContactList();
+		HashMap<Integer, Contact> tempSet = contactList.getContacts();
+		
+		ArrayList<String> contacts = new ArrayList<String>();
+		contacts.add("Add Contact");
+		
+		for (int id = 0; id < tempSet.size(); ++id) {
+			contacts.add(tempSet.get(id).toString());
+		}
+		
+		adapter = new ArrayAdapter<String>(this, android.R.layout.simple_list_item_1, contacts);
+		contactListView.setAdapter(adapter);
+	}
+
+
+
+	public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.activity_main, menu);
+        return true;
+    }
+    
+}

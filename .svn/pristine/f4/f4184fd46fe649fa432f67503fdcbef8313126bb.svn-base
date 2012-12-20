@@ -1,0 +1,146 @@
+package org.security.apps.pim;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
+import android.os.Bundle;
+import android.app.Activity;
+import android.content.Intent;
+import android.view.ContextMenu;
+import android.view.ContextMenu.ContextMenuInfo;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.view.View;
+import android.view.View.OnClickListener;
+import android.widget.AdapterView.AdapterContextMenuInfo;
+import android.widget.AdapterView.OnItemClickListener;
+import android.widget.ArrayAdapter;
+import android.widget.ListView;
+import android.widget.Toast;
+
+public class MainActivity extends Activity {
+
+	public static final int MENU_MESG = 1;
+	public static final int MENU_REMV = 2;
+	public static final int MENU_ADD = 3;
+
+	private boolean noContacts;
+
+	private ArrayAdapter<String> adapter;
+	private ContactList contactList;
+	private ListView contactListView;
+
+	public void onCreate(Bundle savedInstanceState) {
+		super.onCreate(savedInstanceState);
+		setContentView(R.layout.activity_main);
+	}
+
+	@Override
+	protected void onResume() {
+		super.onResume();
+
+		contactListView = (ListView) findViewById(R.id.contactListView);
+
+		contactList = new ContactList();
+		HashMap<Integer, Contact> tempSet = contactList.getContacts();
+		noContacts = tempSet.isEmpty();
+
+		ArrayList<String> contacts = new ArrayList<String>();
+
+		if (noContacts) {
+			contacts.add("Add Contact");
+		}
+
+		else {
+			for (int id = 0; id < tempSet.size(); ++id) {
+				contacts.add(tempSet.get(id).toString());
+			}
+		}
+
+		adapter = new ArrayAdapter<String>(this,
+				android.R.layout.simple_list_item_1, contacts);
+		contactListView.setAdapter(adapter);
+
+		registerForContextMenu(contactListView);
+
+		// contactListView.setOnClickListener(new View.OnClickListener() {
+		//
+		// public void onClick(View v) {
+		// // TODO Auto-generated method stub
+		//
+		// }
+		// });
+	}
+
+	@Override
+	protected void onDestroy() {
+		super.onDestroy();
+//
+//		for (int i = 0; i < 3; ++i) {
+//			if (contactList.SaveContactList())
+//				return;
+//		}
+	}
+
+	public boolean onCreateOptionsMenu(Menu menu) {
+		getMenuInflater().inflate(R.menu.activity_main, menu);
+		menu.clear();
+		menu.add(Menu.NONE, MENU_ADD, Menu.NONE, "Add Contact");
+		return true;
+	}
+
+	@Override
+	public void onCreateContextMenu(ContextMenu menu, View v,
+			ContextMenuInfo menuInfo) {
+		if (noContacts) {
+			menu.add(Menu.NONE, MENU_ADD, Menu.NONE, "Add Contact");
+		}
+
+		else {
+			menu.add(Menu.NONE, MENU_MESG, Menu.NONE, "Message Contact");
+			menu.add(Menu.NONE, MENU_REMV, Menu.NONE, "Remove Contact");
+		}
+	}
+
+	@Override
+	public boolean onMenuItemSelected(int featureId, MenuItem item) {
+		switch (item.getItemId()) {
+		case MENU_ADD:
+			// Toast.makeText(this.getApplicationContext(), "adding contact",
+			// Toast.LENGTH_SHORT).show();
+			Intent intent = new Intent(MainActivity.this,
+					NewContactActivity.class);
+			startActivity(intent);
+			return true;
+
+		default:
+			return super.onMenuItemSelected(featureId, item);
+		}
+	}
+
+	@Override
+	public boolean onContextItemSelected(MenuItem item) {
+		switch (item.getItemId()) {
+		case MENU_MESG:
+			Toast.makeText(this.getApplicationContext(), "messaging contact",
+					Toast.LENGTH_SHORT).show();
+			return true;
+
+		case MENU_REMV:
+			Toast.makeText(this.getApplicationContext(), "removing contact",
+					Toast.LENGTH_SHORT).show();
+			return true;
+
+		case MENU_ADD:
+			// Toast.makeText(this.getApplicationContext(), "adding contact",
+			// Toast.LENGTH_SHORT).show();
+			Intent intent = new Intent(MainActivity.this,
+					NewContactActivity.class);
+			startActivity(intent);
+			return true;
+
+		default:
+			return super.onContextItemSelected(item);
+		}
+	}
+}
