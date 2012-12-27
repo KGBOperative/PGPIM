@@ -6,7 +6,7 @@ import android.content.Context;
 import android.widget.Toast;
 
 public class Crypter {
-	public static String encrypt(Context context, String message, String key) {
+	public static byte[] encrypt(Context context, String message, String key) {
 		byte[] clearText = null;
 		try {
 			clearText = message.getBytes("UTF-8");
@@ -37,14 +37,14 @@ public class Crypter {
 			result[count] = (byte) (clearText[count] ^ byteKey[count % byteKey.length]);
 		}
 
-		String cypherText = null;
-		try {
-			cypherText = new String(result, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			e.printStackTrace();
-		}
+//		String cypherText = null;
+//		try {
+//			cypherText = new String(result, "UTF-8");
+//		} catch (UnsupportedEncodingException e) {
+//			e.printStackTrace();
+//		}
 		
-		return cypherText;
+		return result;
 	}
 
 	public static String decrypt(String cypherText, String key) {
@@ -67,12 +67,13 @@ public class Crypter {
 					% byteKey.length]);
 		}
 
+		String decrypted = "";
 		try {
-			cypherText = new String(result, "UTF-8");
+			decrypted = new String(result, "UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			e.printStackTrace();
 		}
 
-		return cypherText;
+		return decrypted;
 	}
 }

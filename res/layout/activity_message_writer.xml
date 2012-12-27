@@ -38,7 +38,6 @@
         android:layout_above="@+id/messageEncrypt"
         android:layout_alignParentTop="true"
         android:layout_centerHorizontal="true" >
-
     </ListView>
 
 </RelativeLayout>
